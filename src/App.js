@@ -84,7 +84,19 @@ export default function Home() {
   });
 
   const apiGetSignMessage = async () => {
-    const response = await api.get(`/`);
+    const response = await api.get(`/signMessage`);
+    const { result } = response;
+    return result;
+  };
+
+  const apiGetSignature = async () => {
+    const response = await api.post(`/signature`);
+    const { result } = response;
+    return result;
+  };
+
+  const apiGetVerify = async () => {
+    const response = await api.post(`/verify`);
     const { result } = response;
     return result;
   };
@@ -92,14 +104,14 @@ export default function Home() {
   const signMessage = async () => {
     if (!library) return;
 
-    let signMessage = await apiGetSignMessage()
+    // let signMessage = await apiGetSignMessage()
 
-    console.log('signMessage = ', signMessage)
+    // console.log('signMessage = ', signMessage)
 
     try {
       const signature = await library.provider.request({
         method: "personal_sign",
-        params: [signMessage, account]
+        params: [message, account]
       });
       setSignedMessage(message);
       setSignature(signature);
@@ -110,6 +122,8 @@ export default function Home() {
 
   const verifyMessage = async () => {
     if (!library) return;
+
+    console.log('signedMessage', signedMessage)
     try {
       const verify = await library.provider.request({
         method: "personal_ecRecover",
@@ -187,7 +201,7 @@ export default function Home() {
         <VStack justifyContent="center" alignItems="center" padding="10px 0">
 
           <Tooltip label={account} placement="right">
-            <Text>{`connect address: ${account}`}</Text>
+            <Text>{`Account: ${truncateAddress(account)}`}</Text>
           </Tooltip>
         </VStack>
         {account && (
@@ -203,6 +217,12 @@ export default function Home() {
                 <Button onClick={signMessage}>
                   Sign Message
                 </Button>
+                <Input
+                  placeholder="Set Message"
+                  maxLength={20}
+                  onChange={handleInput}
+                  w="140px"
+                />
                 {signature ? (
                   <Tooltip label={signature} placement="bottom">
                     <Text>{`Signature: ${truncateAddress(signature)}`}</Text>
